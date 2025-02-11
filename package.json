@@ -1,0 +1,54 @@
+{
+  "name": "mgraph.graph",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Modern graph data structure for JavaScript – a refactoring of ngraph.graph using mgraph.events",
+  "main": "index.js",
+  "module": "index.js",
+  "types": "index.d.ts",
+  "jsdelivr": "dist/mgraph.graph.min.js",
+  "unpkg": "dist/mgraph.graph.min.js",
+  "scripts": {
+    "build": "browserify index.js -s createGraph -o dist/mgraph.graph.js && uglifyjs dist/mgraph.graph.js -o dist/mgraph.graph.min.js",
+    "test": "tap --allow-incomplete-coverage test/*.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mfeldman143/mgraph.graph.git"
+  },
+  "keywords": [
+    "graph",
+    "graph theory",
+    "edge",
+    "vertex",
+    "node",
+    "network",
+    "connection",
+    "mgraph",
+    "ngraph",
+    "javascript"
+  ],
+  "author": "Michael Feldman",
+  "contributors": [
+    {
+      "name": "Andrei Kashcha",
+      "url": "https://github.com/anvaka",
+      "note": "Original author of ngraph.graph"
+    }
+  ],
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/mfeldman143/mgraph.graph/issues"
+  },
+  "devDependencies": {
+    "benchmark": "^2.1.4",
+    "browserify": "^17.0.0",
+    "eslint": "9.20.0",
+    "mgraph.random": "1.0.0",
+    "tap": "^21.0.2",
+    "uglify-js": "^3.13.5"
+  },
+  "dependencies": {
+    "mgraph.events": "1.0.0"
+  }
+}

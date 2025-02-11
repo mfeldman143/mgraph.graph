@@ -1,0 +1,17 @@
+Edge Iteration:
+
+Non-multigraph: ~755 ops/sec (total weight: 49,950,000)
+Multigraph: ~543 ops/sec (total weight: 49,950,000)
+Graph Construction:
+
+Adding 5,000 edges: ~283 ops/sec
+Adding 5,000 multigraph edges: ~271 ops/sec
+Adding 5,000 random edges: ~225 ops/sec
+Adding 5,000 random edges to multigraph: ~175 ops/sec
+Adding 5,000 random edges and then removing them: ~119 ops/sec
+Adding 5,000 random edges to multigraph and removing them: ~39.55 ops/sec
+Removing all edges one by one from a 5k edge graph: ~271 ops/sec
+Removing all edges one by one from a 5k multigraph: ~169 ops/sec
+Node Iteration:
+
+forEachNode runs at ~35,000 ops/sec, with the sum of node data verifying correctness.
