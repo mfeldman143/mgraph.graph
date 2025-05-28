@@ -1,3 +1,4 @@
+// edge-iteration.mjs
 import createGraph from '../index.js';
 import mgraphRandom from 'mgraph.random';
 import Benchmark from 'benchmark';

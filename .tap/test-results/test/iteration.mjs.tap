@@ -1,0 +1,12 @@
+TAP version 14
+# Subtest: forEachNode iterates nodes and quits fast when requested
+    ok 1 - Iteration stopped early
+    1..1
+ok 1 - forEachNode iterates nodes and quits fast when requested # time=5.141ms
+
+# Subtest: forEachLink iterates over links
+    ok 1 - visited exactly one link
+    1..1
+ok 2 - forEachLink iterates over links # time=0.8ms
+
+1..2

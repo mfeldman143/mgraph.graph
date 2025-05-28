@@ -1,4 +1,4 @@
-
+// index.js
 /**
  * mgraph.graph – A graph data structure for JavaScript.
  * Modern refactoring of ngraph.graph using mgraph.events.
@@ -14,7 +14,9 @@ export default function createGraph(options = {}) {
     );
     options.multigraph = options.uniqueLinkId;
   }
+  
   if (options.multigraph === undefined) options.multigraph = false;
+  
   if (typeof Map !== 'function') {
     throw new Error('mgraph.graph requires Map to be defined. Please polyfill it.');
   }
@@ -40,9 +42,9 @@ export default function createGraph(options = {}) {
     removeLink,
     removeNode,
     getNode,
-    hasNode: getNode,
+    hasNode,
     getLink,
-    hasLink: getLink,
+    hasLink,
     getNodeCount,
     getNodesCount: getNodeCount,
     getLinkCount,
@@ -84,16 +86,17 @@ export default function createGraph(options = {}) {
 
   function addNode(nodeId, data) {
     if (nodeId === undefined) throw new Error('Invalid node identifier');
+    
     enterModification();
     let node = getNode(nodeId);
     if (!node) {
       node = new Node(nodeId, data);
+      nodes.set(nodeId, node);
       recordNodeChange(node, 'add');
     } else {
       node.data = data;
       recordNodeChange(node, 'update');
     }
-    nodes.set(nodeId, node);
     exitModification();
     return node;
   }
@@ -102,14 +105,23 @@ export default function createGraph(options = {}) {
     return nodes.get(nodeId);
   }
 
+  function hasNode(nodeId) {
+    return nodes.has(nodeId);
+  }
+
   function removeNode(nodeId) {
     const node = getNode(nodeId);
     if (!node) return false;
+    
     enterModification();
+    
+    // Remove all links connected to this node
     if (node.links) {
-      node.links.forEach(removeLinkInstance);
-      node.links = null;
+      // Create a copy of the links set to avoid modification during iteration
+      const linksToRemove = Array.from(node.links);
+      linksToRemove.forEach(link => removeLinkInstance(link));
     }
+    
     nodes.delete(nodeId);
     recordNodeChange(node, 'remove');
     exitModification();
@@ -118,13 +130,16 @@ export default function createGraph(options = {}) {
 
   function addLink(fromId, toId, data) {
     enterModification();
+    
     const fromNode = getNode(fromId) || addNode(fromId);
     const toNode = getNode(toId) || addNode(toId);
     const link = createLink(fromId, toId, data);
     const isUpdate = links.has(link.id);
+    
     links.set(link.id, link);
     addLinkToNode(fromNode, link);
     if (fromId !== toId) addLinkToNode(toNode, link);
+    
     recordLinkChange(link, isUpdate ? 'update' : 'add');
     exitModification();
     return link;
@@ -143,11 +158,13 @@ export default function createGraph(options = {}) {
   function createUniqueLink(fromId, toId, data) {
     let linkId = makeLinkId(fromId, toId);
     const isMultiEdge = Object.prototype.hasOwnProperty.call(multiEdges, linkId);
+    
     if (isMultiEdge || getLink(fromId, toId)) {
       if (!isMultiEdge) multiEdges[linkId] = 0;
       const suffix = '@' + (++multiEdges[linkId]);
       linkId = makeLinkId(fromId + suffix, toId + suffix);
     }
+    
     return new Link(fromId, toId, data, linkId);
   }
 
@@ -164,19 +181,27 @@ export default function createGraph(options = {}) {
     return node ? node.links : null;
   }
 
-  function removeLink(link, otherId) {
-    if (otherId !== undefined) link = getLink(link, otherId);
+  function removeLink(link, toNodeId) {
+    if (toNodeId !== undefined) {
+      // Called as removeLink(fromId, toId)
+      link = getLink(link, toNodeId);
+    }
     return removeLinkInstance(link);
   }
 
   function removeLinkInstance(link) {
-    if (!link || !links.get(link.id)) return false;
+    if (!link || !links.has(link.id)) return false;
+    
     enterModification();
+    
     links.delete(link.id);
+    
     const fromNode = getNode(link.fromId);
     const toNode = getNode(link.toId);
+    
     if (fromNode && fromNode.links) fromNode.links.delete(link);
-    if (toNode && toNode.links) toNode.links.delete(link);
+    if (toNode && toNode.links && fromNode !== toNode) toNode.links.delete(link);
+    
     recordLinkChange(link, 'remove');
     exitModification();
     return true;
@@ -187,44 +212,65 @@ export default function createGraph(options = {}) {
     return links.get(makeLinkId(fromNodeId, toNodeId));
   }
 
+  function hasLink(fromNodeId, toNodeId) {
+    if (fromNodeId === undefined || toNodeId === undefined) return false;
+    return links.has(makeLinkId(fromNodeId, toNodeId));
+  }
+
   function clear() {
     enterModification();
-    nodes.forEach(node => removeNode(node.id));
+    
+    // Clear all nodes and links
+    const nodeIds = Array.from(nodes.keys());
+    nodeIds.forEach(nodeId => removeNode(nodeId));
+    
     exitModification();
   }
 
   function forEachLink(callback) {
+    if (typeof callback !== 'function') return;
+    
     for (const link of links.values()) {
       if (callback(link)) return true;
     }
+    return false;
   }
 
   function forEachLinkedNode(nodeId, callback, oriented) {
     const node = getNode(nodeId);
-    if (node && node.links && typeof callback === 'function') {
-      return oriented
-        ? forEachOrientedLink(node.links, nodeId, callback)
-        : forEachNonOrientedLink(node.links, nodeId, callback);
-    }
+    if (!node || !node.links || typeof callback !== 'function') return;
+    
+    return oriented
+      ? forEachOrientedLink(node.links, nodeId, callback)
+      : forEachNonOrientedLink(node.links, nodeId, callback);
   }
 
   function forEachNonOrientedLink(linksSet, nodeId, callback) {
     for (const link of linksSet.values()) {
       const linkedNodeId = link.fromId === nodeId ? link.toId : link.fromId;
-      if (callback(nodes.get(linkedNodeId), link)) return true;
+      const linkedNode = nodes.get(linkedNodeId);
+      if (linkedNode && callback(linkedNode, link)) return true;
     }
+    return false;
   }
 
   function forEachOrientedLink(linksSet, nodeId, callback) {
     for (const link of linksSet.values()) {
-      if (link.fromId === nodeId && callback(nodes.get(link.toId), link)) return true;
+      if (link.fromId === nodeId) {
+        const linkedNode = nodes.get(link.toId);
+        if (linkedNode && callback(linkedNode, link)) return true;
+      }
     }
+    return false;
   }
 
   function forEachNode(callback) {
+    if (typeof callback !== 'function') return;
+    
     for (const node of nodes.values()) {
       if (callback(node)) return true;
     }
+    return false;
   }
 
   function enterModificationReal() {

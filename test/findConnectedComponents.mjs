@@ -1,3 +1,4 @@
+// findConnectedComponents.mjs
 import { test } from 'tap';
 import createGraph from '../index.js';
 import findConnectedComponents from '../examples/findConnectedComponents.js';

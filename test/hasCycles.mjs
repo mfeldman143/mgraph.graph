@@ -1,3 +1,4 @@
+// hasCycles.mjs
 import { test } from 'tap';
 import createGraph from '../index.js';
 import hasCycle from '../examples/hasCycles.js';

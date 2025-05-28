@@ -1,7 +1,27 @@
+# Dependencies
 node_modules/
+npm-debug.log*
+
+# Build outputs  
 dist/
-*.log
-.vscode
-.tap
+
+# Test coverage
+coverage/
+
+# Environment
 .env
-.travis.yml
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log

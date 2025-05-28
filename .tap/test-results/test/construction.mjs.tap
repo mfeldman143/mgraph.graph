@@ -1,0 +1,17 @@
+TAP version 14
+# Subtest: add node adds node
+    ok 1 - exactly one node
+    ok 2 - no links
+    ok 3 - invalid node returned by addNode/getNode
+    ok 4 - data was not set properly
+    ok 5 - node id was not set properly
+    1..5
+ok 1 - add node adds node # time=4.762ms
+
+# Subtest: hasNode checks node
+    ok 1 - node is there
+    ok 2 - should not be here
+    1..2
+ok 2 - hasNode checks node # time=0.761ms
+
+1..2

@@ -1,0 +1,12 @@
+TAP version 14
+# Subtest: can detect cycles
+    ok 1 - cycle found
+    1..1
+ok 1 - can detect cycles # time=6.527ms
+
+# Subtest: detects absence of cycles
+    ok 1 - no cycle found
+    1..1
+ok 2 - detects absence of cycles # time=0.539ms
+
+1..2

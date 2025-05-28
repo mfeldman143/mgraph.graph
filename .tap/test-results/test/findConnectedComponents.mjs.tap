@@ -1,0 +1,11 @@
+TAP version 14
+# Subtest: can find connected components
+    ok 1 - all components found
+    ok 2 - first component found
+    ok 3 - second component found
+    ok 4 - third component found
+    ok 5 - fourth component found
+    1..5
+ok 1 - can find connected components # time=6.96ms
+
+1..1

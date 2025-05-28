@@ -1,3 +1,4 @@
+// node-iteration.mjs
 import Benchmark from 'benchmark';
 import createGraph from '../index.js';
 
